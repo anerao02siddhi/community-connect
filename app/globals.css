@@ -1,0 +1,49 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "keen-slider/keen-slider.min.css";
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+.perspective {
+  perspective: 1500px;
+}
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+/* styles/global.css or wherever you put your CSS */
+.truncate-2-lines {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* Custom scrollbar styles globally */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3e8f5; /* Light lavender track */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #a80ba3; /* Your theme color */
+  border-radius: 6px;
+  border: 2px solid #f3e8f5;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #a80ba3 #f3e8f5;
+}
+

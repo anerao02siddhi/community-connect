@@ -26,7 +26,7 @@ export default function AdminDashboard() {
 
     setAuthorized(true);
     fetchIssues();
-  }, []);
+  }, [router]);
 
   const fetchIssues = async () => {
     setLoading(true);

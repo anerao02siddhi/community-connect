@@ -8,6 +8,7 @@ import CommentsSection from "@/components/CommentsSection";
 import { FaMapMarkerAlt, FaRegImages, FaThumbsUp, FaRegThumbsUp } from "react-icons/fa";
 import { useKeenSlider } from "keen-slider/react";
 import toast from "react-hot-toast";
+import Image from "next/image";
 
 function parseCoordinates(locationString) {
   const [lat, lng] = locationString?.split(",").map((val) => parseFloat(val.trim()));
@@ -253,15 +254,17 @@ export default function HomePage() {
                               {issue.imageUrl.map((url, idx) => (
                                 <div
                                   key={idx}
-                                  className="keen-slider__slide flex justify-center items-center"
+                                  className="keen-slider__slide relative w-full h-[40vh] flex justify-center items-center"
                                 >
-                                  <img
+                                  <Image
                                     src={url}
                                     alt={`image-${idx}`}
-                                    className="object-contain max-h-[40vh] rounded"
+                                    fill
+                                    className="object-contain rounded"
                                   />
                                 </div>
                               ))}
+
                             </div>
 
                             {/* Upvote Section */}

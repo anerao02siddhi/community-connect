@@ -13,7 +13,7 @@ export default function CommentsSection({
 
   useEffect(() => {
     fetchComments();
-  }, [issueId]);
+  }, [issueId, fetchIssues]);
 
   const fetchComments = async () => {
     setLoading(true);

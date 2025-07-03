@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 let watchId; // Declare watchId at module scope
 
@@ -40,7 +41,7 @@ export default function NewIssuePage() {
 
     const states = State.getStatesOfCountry("IN");
     setAllStates(states);
-  }, []);
+  }, [router]);
 
   const handleStateChange = (stateCode) => {
     setSelectedState(stateCode);
@@ -348,10 +349,12 @@ export default function NewIssuePage() {
 
         {imagePreview && (
           <div className="relative mt-2 w-40 h-40">
-            <img
+            <Image
               src={imagePreview}
               alt="Preview"
-              className="w-40 h-40 object-cover rounded border"
+              width={160}     // w-40 = 10rem = 160px
+              height={160}    // h-40 = 10rem = 160px
+              className="object-cover rounded border"
             />
             <Button
               type="button"
@@ -362,6 +365,7 @@ export default function NewIssuePage() {
             </Button>
           </div>
         )}
+
 
         <Button
           type="submit"

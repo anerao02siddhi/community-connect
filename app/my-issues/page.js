@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ export default function MyIssuesPage() {
     }
     const parsedUser = JSON.parse(storedUser);
     setUser(parsedUser);
-  }, [router]);
+  }, [router, fetchIssues]);
 
   useEffect(() => {
     if (user?.id) {
@@ -175,13 +175,16 @@ export default function MyIssuesPage() {
 
               {/* Image */}
               {Array.isArray(issue.imageUrl) && issue.imageUrl[0] && (
-                <div className="w-full">
-                  <img
+                <div className="w-full relative h-38">
+                  <Image
                     src={issue.imageUrl[0]}
                     alt={issue.title}
-                    className="w-full h-38 object-cover"
+                    fill
+                    className="object-cover rounded-t"
+                    sizes="(max-width: 768px) 100vw, 33vw"
                   />
                 </div>
+
               )}
 
               {/* Description */}

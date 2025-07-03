@@ -6,6 +6,7 @@ import { useUser } from "@/context/UserContext";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home } from "lucide-react";
 import { toast } from "react-hot-toast";
+import Image from "next/image";
 
 export default function Navbar() {
   const { user, logout } = useUser();
@@ -41,7 +42,13 @@ export default function Navbar() {
           className="flex items-center gap-4 cursor-pointer"
           onClick={handleHome}
         >
-          <img src="/images/logo.png" alt="Logo" className="h-11 w-11 object-contain" />
+          <Image
+            src="/images/logo.png"
+            alt="Logo"
+            width={44}
+            height={44}
+            className="object-contain"
+          />
           <div className="flex gap-1.5">
             <h1 className="text-3xl font-Poppins font-semibold tracking-wide text-[#a80ba3]">
               Community
@@ -51,6 +58,7 @@ export default function Navbar() {
             </h1>
           </div>
         </div>
+
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-4 items-center">

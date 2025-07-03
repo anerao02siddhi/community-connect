@@ -35,15 +35,20 @@ export default function HomePage() {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      fetchIssues(parsedUser.id);
+    } else {
+      fetchIssues(null);
     }
-    fetchIssues();
   }, []);
 
-  const fetchIssues = async () => {
+
+  const fetchIssues = async (userId) => {
     setLoading(true);
     try {
-      const res = await fetch("/api/issues");
+      const url = userId ? `/api/issues?userId=${userId}` : "/api/issues";
+      const res = await fetch(url);
       const data = await res.json();
       console.log("Fetched issues:", data);
 
@@ -60,6 +65,7 @@ export default function HomePage() {
     }
     setLoading(false);
   };
+
 
   const handleToggleUpvote = async (postId) => {
     if (!user) return alert("You must be logged in.");
@@ -261,16 +267,17 @@ export default function HomePage() {
                             {/* Upvote Section */}
                             <span
                               onClick={() => handleToggleUpvote(issue.id)}
-                              className="cursor-pointer text-2xl"
+                              className="cursor-pointer flex items-center gap-2 text-2xl"
                               title={issue.hasUpvoted ? "Unvote" : "Upvote"}
                             >
-
                               {issue.hasUpvoted ? (
                                 <FaThumbsUp className="text-[#a80ba3]" />
                               ) : (
                                 <FaRegThumbsUp className="text-gray-500 hover:text-[#a80ba3]" />
                               )}
+                              <span className="text-base font-semibold text-[#a80ba3]">{issue.upvotes ?? 0}</span>
                             </span>
+
 
 
                             {/* Comments */}

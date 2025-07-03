@@ -2,7 +2,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
-export default function CommentsSection({ issueId, userId }) {
+export default function CommentsSection({
+  issueId,
+  userId,
+  onCountChange, // New prop to notify parent
+}) {
   const [comments, setComments] = useState([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -17,9 +21,15 @@ export default function CommentsSection({ issueId, userId }) {
       const res = await fetch(`/api/issues/${issueId}/comments`);
       const data = await res.json();
       setComments(data);
+      if (onCountChange) {
+        onCountChange(Array.isArray(data) ? data.length : 0);
+      }
     } catch (error) {
       console.error("Failed to load comments", error);
       setComments([]);
+      if (onCountChange) {
+        onCountChange(0);
+      }
     }
     setLoading(false);
   };
@@ -37,7 +47,7 @@ export default function CommentsSection({ issueId, userId }) {
     });
 
     setText("");
-    fetchComments();
+    fetchComments(); // Refresh after posting
   };
 
   return (

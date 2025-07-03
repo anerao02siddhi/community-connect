@@ -69,7 +69,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen w-screen flex justify-center items-center bg-[#ffeefe] overflow-hidden">
+    <div className="h-screen w-screen overflow-y-auto hide-scrollbar flex justify-center items-center bg-[#ffeefe]">
       <div className="relative perspective">
         <div
           className={`transition-transform duration-700 w-[768px] h-[400px] relative transform-style-preserve-3d ${isFlipped ? "rotate-y-180" : ""}`}

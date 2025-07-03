@@ -37,6 +37,9 @@ export async function POST(req) {
 
 export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+
     const issues = await prisma.post.findMany({
       orderBy: { createdAt: "desc" },
       select: {
@@ -45,6 +48,7 @@ export async function GET(req) {
         description: true,
         createdAt: true,
         upvotes: true,
+        upvotedBy: true, // this array field
         address: true,
         taluka: true,
         district: true,
@@ -54,7 +58,13 @@ export async function GET(req) {
       },
     });
 
-    return Response.json(issues);
+    // Attach hasUpvoted
+    const issuesWithHasUpvoted = issues.map((issue) => ({
+      ...issue,
+      hasUpvoted: userId ? issue.upvotedBy.includes(userId) : false,
+    }));
+
+    return Response.json(issuesWithHasUpvoted);
   } catch (error) {
     console.error("Error fetching issues:", error);
     return Response.json(
@@ -63,4 +73,3 @@ export async function GET(req) {
     );
   }
 }
-

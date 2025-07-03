@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
+let watchId; // Declare watchId at module scope
+
 export default function NewIssuePage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -66,6 +68,26 @@ export default function NewIssuePage() {
     }
   };
 
+  // ✅ Start camera and live location together
+  const startCameraAndLocation = async () => {
+    // Start watching position
+    watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        console.log("Live coords:", pos.coords);
+        setCoordinates({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocation(`${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
+      },
+      (err) => {
+        console.error("Location error:", err);
+        alert("Could not get location.");
+      },
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
+    );
+
+    // Start camera
+    await startCamera();
+  };
+
   const handleCapture = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -76,6 +98,7 @@ export default function NewIssuePage() {
     const imageDataUrl = canvas.toDataURL("image/png");
     setImage(imageDataUrl);
     setImagePreview(imageDataUrl);
+
     const stream = video.srcObject;
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());
@@ -83,21 +106,10 @@ export default function NewIssuePage() {
     }
     setUseCamera(false);
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setCoordinates({ lat: latitude, lng: longitude });
-          setLocation(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-        },
-        (error) => {
-          console.error("Location error:", error.message);
-          alert("Unable to access location.");
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    } else {
-      alert("Geolocation not supported.");
+    // Stop watching location
+    if (watchId) {
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
     }
   };
 
@@ -182,9 +194,10 @@ export default function NewIssuePage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 mt-6 bg-white rounded shadow space-y-4">
+    <div className="max-w-md bg-[#fef2fd] mx-auto p-4 mt-6 rounded shadow space-y-4 overflow-hidden">
       <h2 className="text-2xl font-bold">Report New Issue</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Form fields */}
         <div className="space-y-2">
           <Label>Issue Title</Label>
           <Input
@@ -278,7 +291,7 @@ export default function NewIssuePage() {
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
               type="button"
-              onClick={startCamera}
+              onClick={startCameraAndLocation}
               className="flex-1 bg-[#a80ba3] hover:bg-[#922a8f] text-white"
             >
               Capture Photo
@@ -320,6 +333,10 @@ export default function NewIssuePage() {
                     stream.getTracks().forEach((track) => track.stop());
                   }
                   setUseCamera(false);
+                  if (watchId) {
+                    navigator.geolocation.clearWatch(watchId);
+                    watchId = null;
+                  }
                 }}
                 className="flex-1 bg-red-600 text-white"
               >
@@ -345,7 +362,6 @@ export default function NewIssuePage() {
             </Button>
           </div>
         )}
-
 
         <Button
           type="submit"

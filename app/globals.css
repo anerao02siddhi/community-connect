@@ -46,4 +46,13 @@ html, body {
   scrollbar-width: thin;
   scrollbar-color: #a80ba3 #f3e8f5;
 }
+/* Completely hide scrollbar but keep scrolling enabled */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
 

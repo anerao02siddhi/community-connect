@@ -121,11 +121,13 @@ export default function LoginPage() {
               </form>
             </div>
             <div className="w-[2px] bg-[#a80ba3] opacity-80"></div>
-            <div className="w-1/2 bg-[#fcd8fc] flex items-center justify-center rounded-tr-2xl rounded-br-2xl overflow-hidden">
-              <img
+            <div className="w-1/2 bg-[#fcd8fc] flex items-center justify-center rounded-tr-2xl rounded-br-2xl overflow-hidden relative">
+              <Image
                 src="/images/community.png"
                 alt="Login Illustration"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                priority
               />
             </div>
           </div>

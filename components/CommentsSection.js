@@ -1,21 +1,19 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 
 export default function CommentsSection({
   issueId,
   userId,
-  onCountChange, // New prop to notify parent
+  onCountChange, // Optional prop to notify parent
 }) {
   const [comments, setComments] = useState([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchComments();
-  }, [issueId, fetchIssues]);
-
-  const fetchComments = async () => {
+  // ✅ Wrap in useCallback
+  const fetchComments = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/issues/${issueId}/comments`);
@@ -32,7 +30,11 @@ export default function CommentsSection({
       }
     }
     setLoading(false);
-  };
+  }, [issueId, onCountChange]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

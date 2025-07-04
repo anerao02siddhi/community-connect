@@ -355,6 +355,7 @@ export default function NewIssuePage() {
               width={160}     // w-40 = 10rem = 160px
               height={160}    // h-40 = 10rem = 160px
               className="object-cover rounded border"
+              unoptimized
             />
             <Button
               type="button"

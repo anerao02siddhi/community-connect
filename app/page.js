@@ -261,6 +261,7 @@ export default function HomePage() {
                                     alt={`image-${idx}`}
                                     fill
                                     className="object-contain rounded"
+                                    unoptimized
                                   />
                                 </div>
                               ))}

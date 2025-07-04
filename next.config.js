@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    turbo: false, // Disable Turbopack, use Webpack
+
+  },
+  images: {
+    domains: ["res.cloudinary.com"],
   },
 };
 

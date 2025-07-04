@@ -70,15 +70,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-y-auto hide-scrollbar flex justify-center items-center bg-[#ffeefe]">
-      <div className="relative perspective">
+    <div className="min-h-screen w-full flex items-start justify-center pt-32 bg-[#ffeefe] p-4">
+      <div className="w-full max-w-3xl relative">
         <div
-          className={`transition-transform duration-700 w-[768px] h-[400px] relative transform-style-preserve-3d ${isFlipped ? "rotate-y-180" : ""}`}
+          className={`relative w-full transition-transform duration-700 transform-style-preserve-3d ${isFlipped ? "rotate-y-180" : ""
+            }`}
         >
           {/* Front - Login */}
-          <div className="absolute w-full h-full backface-hidden bg-white shadow-2xl rounded-2xl flex">
-            <div className="w-1/2 p-8 flex flex-col justify-center">
-              <h1 className="text-3xl font-bold text-center mb-6 text-[#a80ba3]">Login</h1>
+          <div className="absolute w-full backface-hidden bg-white shadow-lg rounded-2xl flex flex-col md:flex-row">
+            <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center">
+              <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 text-[#a80ba3]">
+                Login
+              </h1>
               <form onSubmit={handleLogin} className="space-y-4">
                 <Input
                   type="email"
@@ -101,7 +104,7 @@ export default function LoginPage() {
                 >
                   {loading ? "Logging in..." : "Login"}
                 </Button>
-                <div className="text-sm text-right">
+                <div className="text-sm text-center md:text-right">
                   <button
                     type="button"
                     onClick={() => router.push("/forgot-password")}
@@ -120,8 +123,8 @@ export default function LoginPage() {
                 </Button>
               </form>
             </div>
-            <div className="w-[2px] bg-[#a80ba3] opacity-80"></div>
-            <div className="w-1/2 bg-[#fcd8fc] flex items-center justify-center rounded-tr-2xl rounded-br-2xl overflow-hidden relative">
+            <div className="hidden md:block w-[2px] bg-[#a80ba3] opacity-80"></div>
+            <div className="hidden md:flex w-1/2 bg-[#fcd8fc] items-center justify-center rounded-tr-2xl rounded-br-2xl overflow-hidden relative">
               <Image
                 src="/images/community.png"
                 alt="Login Illustration"
@@ -133,9 +136,11 @@ export default function LoginPage() {
           </div>
 
           {/* Back - Register */}
-          <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-white shadow-2xl rounded-2xl flex">
-            <div className="w-1/2 p-8 flex flex-col justify-center">
-              <h1 className="text-3xl font-bold text-center mb-6 text-[#a80ba3]">Register</h1>
+          <div className="absolute w-full backface-hidden rotate-y-180 bg-white shadow-lg rounded-2xl flex flex-col md:flex-row">
+            <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center">
+              <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 text-[#a80ba3]">
+                Register
+              </h1>
               <form onSubmit={handleRegister} className="space-y-4">
                 <Input
                   type="text"
@@ -158,7 +163,10 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <Button type="submit" className="w-full bg-[#a80ba3] text-white hover:bg-[#922a8f]">
+                <Button
+                  type="submit"
+                  className="w-full bg-[#a80ba3] text-white hover:bg-[#922a8f]"
+                >
                   Register
                 </Button>
                 <Button
@@ -167,22 +175,20 @@ export default function LoginPage() {
                   className="w-full border-[#a80ba3] text-[#a80ba3] hover:bg-[#fcd8fc]"
                   onClick={() => setIsFlipped(false)}
                 >
-                  Already have an account ?
+                  Already have an account?
                 </Button>
               </form>
             </div>
-            <div className="w-[2px] bg-[#a80ba3] opacity-80"></div>
-            <div className="w-1/2 bg-[#fcd8fc] flex items-center justify-center rounded-tr-2xl rounded-br-2xl overflow-hidden relative">
+            <div className="hidden md:block w-[2px] bg-[#a80ba3] opacity-80"></div>
+            <div className="hidden md:flex w-1/2 bg-[#fcd8fc] items-center justify-center rounded-tr-2xl rounded-br-2xl overflow-hidden relative">
               <Image
                 src="/images/community.png"
-                alt="Login Illustration"
+                alt="Register Illustration"
                 fill
                 className="object-cover"
                 priority
-                unoptimized
               />
             </div>
-
           </div>
         </div>
       </div>

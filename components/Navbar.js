@@ -35,7 +35,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-[#f9ddf8] shadow-md sticky top-0 z-50">
+    <header className="bg-[#f9ddf8] shadow-md sticky top-0 z-50 relative">
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo + Name */}
         <div
@@ -58,7 +58,6 @@ export default function Navbar() {
             </h1>
           </div>
         </div>
-
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-4 items-center">
@@ -113,9 +112,9 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
+      {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t px-4 py-3 space-y-3 shadow-lg">
+        <div className="absolute left-0 right-0 mt-1 md:hidden bg-white border-t px-4 py-3 space-y-3 shadow-lg z-50">
           <Button
             size="sm"
             variant="outline"

@@ -36,7 +36,7 @@ export default function NewIssuePage() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (!storedUser) router.push("/login");
+    if (!storedUser) router.push("/login-register");
     else setUser(JSON.parse(storedUser));
 
     const states = State.getStatesOfCountry("IN");
@@ -58,23 +58,34 @@ export default function NewIssuePage() {
     }
     setUseCamera(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Try back camera first
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: "environment" } },
+      });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
     } catch (err) {
-      console.error("Camera error:", err);
-      alert("Unable to access camera.");
-      setUseCamera(false);
+      console.warn("Back camera failed, trying front camera:", err);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" },
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err2) {
+        console.error("Camera error:", err2);
+        alert("Unable to access any camera.");
+        setUseCamera(false);
+      }
     }
   };
 
-  // ✅ Start camera and live location together
   const startCameraAndLocation = async () => {
     // Start watching position
     watchId = navigator.geolocation.watchPosition(
       (pos) => {
-        console.log("Live coords:", pos.coords);
         setCoordinates({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocation(`${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`);
       },
@@ -107,7 +118,6 @@ export default function NewIssuePage() {
     }
     setUseCamera(false);
 
-    // Stop watching location
     if (watchId) {
       navigator.geolocation.clearWatch(watchId);
       watchId = null;
@@ -198,7 +208,6 @@ export default function NewIssuePage() {
     <div className="max-w-md bg-[#fef2fd] mx-auto p-4 mt-6 rounded shadow space-y-4 overflow-hidden">
       <h2 className="text-2xl font-bold">Report New Issue</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Form fields */}
         <div className="space-y-2">
           <Label>Issue Title</Label>
           <Input
@@ -352,8 +361,8 @@ export default function NewIssuePage() {
             <Image
               src={imagePreview}
               alt="Preview"
-              width={160}     // w-40 = 10rem = 160px
-              height={160}    // h-40 = 10rem = 160px
+              width={160}
+              height={160}
               className="object-cover rounded border"
               unoptimized
             />
@@ -366,7 +375,6 @@ export default function NewIssuePage() {
             </Button>
           </div>
         )}
-
 
         <Button
           type="submit"

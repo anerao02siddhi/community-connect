@@ -56,3 +56,16 @@ html, body {
   scrollbar-width: none; /* Firefox */
 }
 
+.dropdown-menu-content-white {
+  background-color: white !important;
+}
+.leaflet-container {
+  z-index: 0 !important;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

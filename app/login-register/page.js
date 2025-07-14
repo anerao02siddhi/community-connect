@@ -7,11 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from "@/components/ui/select";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("user");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const router = useRouter();
@@ -37,10 +46,14 @@ export default function LoginPage() {
       localStorage.setItem("user", JSON.stringify(data.user));
       login(data.user);
 
-      toast.success("Login successful!");
       if (data.user.role === "admin") {
-        router.push("/admin");
+        toast.success(`Welcome ${data.user.name}`);
+        router.push("/admin/dashboard");
+      } else if (data.user.role === "official") {
+        toast.success(`Welcome ${data.user.name}`);
+        router.push("/officials/all-issues");
       } else {
+        toast.success(`Welcome ${data.user.name}`);
         router.push("/");
       }
     } else {
@@ -55,7 +68,7 @@ export default function LoginPage() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, phone, role }),
     });
 
     const data = await res.json();
@@ -150,6 +163,13 @@ export default function LoginPage() {
                   required
                 />
                 <Input
+                  type="tel"
+                  placeholder="Phone Number"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                />
+                <Input
                   type="email"
                   placeholder="Email"
                   value={email}
@@ -163,6 +183,20 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Register As</label>
+                  <Select value={role} onValueChange={setRole}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select role" />
+                    </SelectTrigger>
+                    <SelectContent className='bg-white'>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="official">Official</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+
                 <Button
                   type="submit"
                   className="w-full bg-[#a80ba3] text-white hover:bg-[#922a8f]"

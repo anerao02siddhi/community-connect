@@ -8,14 +8,23 @@ datasource db {
 }
 
 model User {
-  id       String    @id @default(auto()) @map("_id") @db.ObjectId
-  name     String
-  email    String    @unique
-  password String
-  role     String    @default("user")
-  image    String[]
-  posts    Post[]    @relation("UserPosts") // 1-to-many User → Posts
-  comments Comment[] @relation("UserComments") // 1-to-many User → Comments
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  email       String    @unique
+  password    String
+  role        String    @default("user")
+  image       String[]
+  phone       String
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLogin   DateTime?
+  isApproved  Boolean  @default(false)   // ← This is important
+  isSuspended  Boolean  @default(false)    // ✅ Add this
+  posts       Post[]    @relation("UserPosts")
+  comments    Comment[] @relation("UserComments")
+  resetToken       String?   // nullable
+  resetTokenExpiry DateTime? // nullable
 }
 
 model Post {
@@ -23,32 +32,42 @@ model Post {
   title       String
   description String
   imageUrl    String[]
+  afterImageUrl  String[] @default([])
   location    String
   coordinates Json?
-  status      String   @default("open")
+  status      String   @default("Open")
+
+  category    String?   // NEW: Main Problem Category
+  issueType   String?   // NEW: Specific Issue Type
+
+  pincode     String?
+  state       String?
+  district    String?
+  taluka      String?
+  address     String?
+
   createdAt   DateTime @default(now())
-  pincode     String? // ✅ Add this line
-  state       String? // 🟢 Already added
-  district    String? // 🟢 Already added
-  taluka      String? // 🟢 Already added
-  address     String? // 🆕 NEW FIELD
+  updatedAt   DateTime @updatedAt
 
-  user   User   @relation("UserPosts", fields: [userId], references: [id])
-  userId String @db.ObjectId
+  user        User     @relation("UserPosts", fields: [userId], references: [id])
+  userId      String   @db.ObjectId
 
-  comments  Comment[] @relation("PostComments")
-  upvotes   Int       @default(0)
-  upvotedBy String[]  @default([])
+  comments    Comment[] @relation("PostComments")
+  upvotes     Int       @default(0)
+  upvotedBy   String[]  @default([])
 }
+
 
 model Comment {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   text      String
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  post   Post   @relation("PostComments", fields: [postId], references: [id])
-  postId String @db.ObjectId
+  post      Post     @relation("PostComments", fields: [postId], references: [id])
+  postId    String   @db.ObjectId
 
-  user   User?   @relation("UserComments", fields: [userId], references: [id])
-  userId String? @db.ObjectId
+  user      User?    @relation("UserComments", fields: [userId], references: [id])
+  userId    String?  @db.ObjectId
 }

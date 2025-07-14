@@ -1,9 +1,10 @@
 import prisma from "@/lib/prisma";
+
 export async function POST(req) {
   try {
-    const { title, description, location, email, imageUrl, state, district, taluka, address, pincode } = await req.json();
+    const { title, description, location, email, imageUrl, state, district, taluka, address, pincode, category, issueType } = await req.json();
 
-    if (!title || !description || !location || !email || !address || !pincode) {
+    if (!title || !description || !location || !email || !address || !pincode || !category || !issueType || !state || !district || !taluka) {
       return Response.json({ error: "All fields are required." }, { status: 400 });
     }
 
@@ -24,6 +25,8 @@ export async function POST(req) {
         userId: user.id,
         imageUrl: imageUrl ? [imageUrl] : [],
         pincode,
+        category,
+        issueType,
       },
     });
 
@@ -35,11 +38,9 @@ export async function POST(req) {
 }
 
 
+
 export async function GET(req) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-
     const issues = await prisma.post.findMany({
       orderBy: { createdAt: "desc" },
       select: {
@@ -48,28 +49,32 @@ export async function GET(req) {
         description: true,
         createdAt: true,
         upvotes: true,
-        upvotedBy: true, // this array field
+        upvotedBy: true,
         address: true,
         taluka: true,
         district: true,
         state: true,
         location: true,
         imageUrl: true,
+        afterImageUrl: true,
+        status: true,
+        userId: true,
+        category: true,
+        issueType: true,
       },
     });
 
-    // Attach hasUpvoted
-    const issuesWithHasUpvoted = issues.map((issue) => ({
+    const issuesWithUpvoteFlag = issues.map((issue) => ({
       ...issue,
-      hasUpvoted: userId ? issue.upvotedBy.includes(userId) : false,
+      hasUpvoted: false, // No user context on home page
     }));
 
-    return Response.json(issuesWithHasUpvoted);
+    return Response.json(issuesWithUpvoteFlag);
   } catch (error) {
-    console.error("Error fetching issues:", error);
-    return Response.json(
-      { error: "Internal Server Error", detail: error.message },
-      { status: 500 }
-    );
+    console.error("Error fetching all issues:", error);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+    });
   }
 }
+

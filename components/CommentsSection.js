@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 export default function CommentsSection({
   issueId,
@@ -12,18 +13,19 @@ export default function CommentsSection({
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ✅ Wrap in useCallback
   const fetchComments = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/issues/${issueId}/comments`);
+      if (!res.ok) throw new Error("Failed to fetch comments");
       const data = await res.json();
       setComments(data);
       if (onCountChange) {
-        onCountChange(Array.isArray(data) ? data.length : 0);
+        onCountChange(issueId, Array.isArray(data) ? data.length : 0);
       }
     } catch (error) {
       console.error("Failed to load comments", error);
+      toast.error("Error loading comments");
       setComments([]);
       if (onCountChange) {
         onCountChange(0);
@@ -39,17 +41,26 @@ export default function CommentsSection({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!userId) {
-      alert("Missing userId.");
+      toast.error("User not logged in.");
       return;
     }
-    await fetch(`/api/issues/${issueId}/comments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, userId }),
-    });
 
-    setText("");
-    fetchComments(); // Refresh after posting
+    try {
+      const res = await fetch(`/api/issues/${issueId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, userId }),
+      });
+
+      if (!res.ok) throw new Error("Failed to post comment");
+
+      toast.success("Comment posted successfully!");
+      setText("");
+      fetchComments();
+    } catch (err) {
+      console.error("Error posting comment:", err);
+      toast.error("Failed to post comment");
+    }
   };
 
   return (
@@ -68,6 +79,7 @@ export default function CommentsSection({
           Post
         </Button>
       </form>
+
       {loading ? (
         <p className="text-sm text-gray-500">Loading comments...</p>
       ) : comments.length === 0 ? (

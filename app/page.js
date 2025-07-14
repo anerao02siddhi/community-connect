@@ -38,16 +38,22 @@ export default function HomePage() {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
-      fetchIssues(parsedUser.id);
+      fetchIssues(parsedUser.id, true); // Fetch issues by user
     } else {
-      fetchIssues(null);
+      fetchIssues(); // Fetch all issues if no user is logged in
     }
   }, []);
 
-  const fetchIssues = async (userId) => {
+
+
+  const fetchIssues = async (userId = null, filterByUser = false) => {
     setLoading(true);
     try {
-      const url = userId ? `/api/issues?userId=${userId}` : "/api/issues";
+      const url =
+        filterByUser && userId
+          ? `/api/issues?userId=${userId}` // Only include userId if explicitly filtering
+          : `/api/issues`;
+
       const res = await fetch(url);
       const data = await res.json();
       console.log("Fetched issues:", data);
@@ -66,8 +72,9 @@ export default function HomePage() {
     setLoading(false);
   };
 
+
   const handleToggleUpvote = async (postId) => {
-    if (!user) return alert("You must be logged in.");
+    if (!user) return toast.error("You must be Login first.");
 
     const res = await fetch(`/api/issues/${postId}/upvote`, {
       method: "POST",
@@ -139,12 +146,13 @@ export default function HomePage() {
         <div className="w-full overflow-x-auto">
           <Table className="min-w-[650px]">
             <TableHeader>
-              <TableRow>
+              <TableRow className='bg-[#EDCEEC]'>
                 <TableHead className="min-w-[40px] p-2 text-center">#</TableHead>
                 <TableHead className="min-w-[150px] p-2 text-left">Title</TableHead>
-                <TableHead className="min-w-[200px] p-2 text-left">Description</TableHead>
-                <TableHead className="min-w-[180px] p-2 text-left">Address</TableHead>
-                <TableHead className="min-w-[80px] p-2 text-center">Upvotes</TableHead>
+                <TableHead className="min-w-[220px] p-2 text-center">Description</TableHead>
+                <TableHead className="min-w-[220px] p-2 text-center">Address</TableHead>
+                <TableHead className="min-w-[80px] p-2 text-center">Status</TableHead>
+                <TableHead className="min-w-[100px] p-2 text-center">Upvotes</TableHead>
                 <TableHead className="min-w-[120px] p-2 text-center">Map & Images</TableHead>
               </TableRow>
             </TableHeader>
@@ -211,6 +219,7 @@ export default function HomePage() {
                         .filter(Boolean)
                         .join(", ")}
                     </TableCell>
+                    <TableCell className="text-center p-2">{issue.status ?? 0}</TableCell>
                     <TableCell className="text-center p-2">{issue.upvotes ?? 0}</TableCell>
                     <TableCell className="flex items-center justify-center gap-3 p-2">
                       {issue.location && parseCoordinates(issue.location) && (
@@ -240,6 +249,7 @@ export default function HomePage() {
                                 Issue - {issue.title}
                               </DialogTitle>
                             </DialogHeader>
+                            <h3 className="font-semibold text-[#a80ba3]">Before Work</h3>
                             <div ref={sliderRef} className="keen-slider rounded-lg overflow-hidden">
                               {issue.imageUrl.map((url, idx) => (
                                 <div
@@ -256,6 +266,29 @@ export default function HomePage() {
                                 </div>
                               ))}
                             </div>
+                            <h3 className="font-semibold text-[#a80ba3]">After Work</h3>
+                            {Array.isArray(issue.afterImageUrl) && issue.afterImageUrl.length > 0 ? (
+                              <div ref={sliderRef} className="keen-slider rounded-lg overflow-hidden">
+                                {issue.afterImageUrl.map((url, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="keen-slider__slide relative w-full h-[40vh] flex justify-center items-center"
+                                  >
+                                    <Image
+                                      src={url}
+                                      alt={`after-image-${idx}`}
+                                      fill
+                                      className="object-contain rounded"
+                                      unoptimized
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="w-full h-[40vh] flex items-center justify-center bg-white border rounded text-[#a80ba3] font-semibold">
+                                Working!
+                              </div>
+                            )}
                             <span
                               onClick={() => handleToggleUpvote(issue.id)}
                               className="cursor-pointer flex items-center gap-2 text-2xl"

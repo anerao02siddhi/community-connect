@@ -24,9 +24,8 @@ export default function Navbar() {
     router.push("/login-register");
   };
 
-  const handleMyIssues = () => {
-    toast("Opening My Issues...");
-    router.push("/my-issues");
+  const handleDashboard = () => {
+    router.push("/admin/dashboard");
   };
 
   const handleHome = () => {
@@ -34,10 +33,25 @@ export default function Navbar() {
     router.push("/");
   };
 
+  const handleIssues = () => {
+    toast("Going To Issues...");
+    router.push("/admin/all-issues");
+  };
+
+  const handleRequest = () => {
+    toast("Going To Request Page...");
+    router.push("/admin/request-page");
+  };
+
+  const handleOfficialIssues = () => {
+    toast("Going to Official Dashboard...");
+    router.push("/officials/all-issues");
+  };
+
   return (
     <header className="bg-[#f9ddf8] shadow-md sticky top-0 z-50 relative">
       <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        {/* Logo + Name */}
+        {/* Logo */}
         <div
           className="flex items-center gap-4 cursor-pointer"
           onClick={handleHome}
@@ -59,27 +73,77 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Nav */}
         <nav className="hidden md:flex gap-4 items-center">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleHome}
-            className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-          >
-            <Home className="h-4 w-4 mr-1" />
-            Home
-          </Button>
           {user ? (
             <>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleMyIssues}
-                className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-              >
-                My Issues
-              </Button>
+              {user.role === "admin" && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleDashboard}
+                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleIssues}
+                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                  >
+                    All Issues
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleRequest}
+                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                  >
+                    Requests
+                  </Button>
+                </>
+              )}
+
+              {user.role === "official" && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleOfficialIssues}
+                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                  >
+                    Official Dashboard
+                  </Button>
+                </>
+              )}
+
+              {user.role !== "admin" && user.role !== "official" && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleHome}
+                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                  >
+                    <Home className="h-4 w-4 mr-1" />
+                    Home
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      toast("Opening My Issues...");
+                      router.push("/my-issues");
+                    }}
+                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                  >
+                    My Issues
+                  </Button>
+                </>
+              )}
+
               <span className="text-base font-medium text-[#a80ba3]">Hi, {user.name}</span>
               <Button
                 size="sm"
@@ -100,7 +164,7 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Mobile Menu Icon */}
+        {/* Mobile Menu */}
         <div className="md:hidden">
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? (
@@ -112,34 +176,67 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="absolute left-0 right-0 mt-1 md:hidden bg-white border-t px-4 py-3 space-y-3 shadow-lg z-50">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              handleHome();
-              setMobileMenuOpen(false);
-            }}
-            className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-          >
-            <Home className="h-4 w-4 mr-1" />
-            Home
-          </Button>
           {user ? (
             <>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  handleMyIssues();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-              >
-                My Issues
-              </Button>
+              {user.role === "admin" && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      handleDashboard();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                  >
+                    Dashboard
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      handleIssues();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                  >
+                    All Issues
+                  </Button>
+                </>
+              )}
+
+              {user.role === "official" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    handleOfficialIssues();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                >
+                  Official Dashboard
+                </Button>
+              )}
+
+              {user.role !== "admin" && user.role !== "official" && (
+                <>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      router.push("/my-issues");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                  >
+                    My Issues
+                  </Button>
+                </>
+              )}
+
               <span className="block text-gray-800 text-base font-medium">
                 Hi, {user.name}
               </span>

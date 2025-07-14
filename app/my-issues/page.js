@@ -26,7 +26,7 @@ export default function MyIssuesPage() {
   const recordsPerPage = 9;
   const router = useRouter();
 
-  // Fetch comment counts for each issue
+  // ✅ Fetch comment counts for each issue
   const fetchCommentCounts = useCallback(async (ids) => {
     const countsObj = {};
     await Promise.all(
@@ -52,7 +52,7 @@ export default function MyIssuesPage() {
     if (!user?.id) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/issues?userId=${user.id}`);
+      const res = await fetch(`/api/issues/my-issues/?userId=${user.id}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setIssues(data);
@@ -70,6 +70,13 @@ export default function MyIssuesPage() {
       setLoading(false);
     }
   }, [user, fetchCommentCounts]);
+
+  const handleCountChange = useCallback((id, count) => {
+    setCommentCounts((prev) => ({
+      ...prev,
+      [id]: count,
+    }));
+  }, []);
 
   // Load user from localStorage
   useEffect(() => {
@@ -239,12 +246,7 @@ export default function MyIssuesPage() {
                     <CommentsSection
                       issueId={issue.id}
                       userId={user?.id}
-                      onCountChange={(count) =>
-                        setCommentCounts((prev) => ({
-                          ...prev,
-                          [issue.id]: count,
-                        }))
-                      }
+                      onCountChange={handleCountChange}
                     />
                   </DialogContent>
                 </Dialog>

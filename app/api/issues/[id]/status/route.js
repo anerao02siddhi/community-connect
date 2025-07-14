@@ -1,10 +1,10 @@
 import prisma from "@/lib/prisma";
 
-export async function PUT(req, { params }) {
-  const { id } = params;
+export async function PUT(req, context) {
+  const { id } = await context.params;
   const { status } = await req.json();
 
-  if (!["open", "in-progress", "resolved"].includes(status)) {
+  if (!["Open", "Working", "Resolve"].includes(status)) {
     return Response.json({ error: "Invalid status" }, { status: 400 });
   }
 
@@ -18,3 +18,4 @@ export async function PUT(req, { params }) {
     return Response.json({ error: "Issue not found" }, { status: 404 });
   }
 }
+

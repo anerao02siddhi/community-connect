@@ -1,39 +1,45 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
-export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
+export default function ResetPasswordForm() {
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email) {
-      toast.error("Please enter your email address.");
+    if (!password || !token) {
+      toast.error("Missing password or token.");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/forgot-password", {
+      const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ token, password }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        toast.success(data.message || "Reset link sent successfully.");
-        setEmail("");
+        toast.success(data.message || "Password reset successfully.");
+        setPassword("");
+        router.push('login-register');
       } else {
-        toast.error(data.error || "Failed to send reset link.");
+        toast.error(data.error || "Failed to reset password.");
       }
     } catch (err) {
       console.error(err);
@@ -43,26 +49,34 @@ export default function ForgotPassword() {
     }
   };
 
+  if (!token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-red-600 font-medium">Invalid token.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4 py-8">
       <Card className="w-full max-w-md shadow-lg border border-gray-200">
         <CardHeader>
           <CardTitle className="text-2xl text-center text-[#a80ba3]">
-            Forgot Password
+            Reset Password
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2 gap-3">
-              <Label htmlFor="email" className="text-[#a80ba3]">
-                Email Address
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-[#a80ba3]">
+                New Password
               </Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="password"
+                type="password"
+                placeholder="Enter new password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
@@ -93,10 +107,10 @@ export default function ForgotPassword() {
                       d="M4 12a8 8 0 018-8v8H4z"
                     ></path>
                   </svg>
-                  Sending...
+                  Resetting...
                 </span>
               ) : (
-                "Send Reset Link"
+                "Reset Password"
               )}
             </Button>
           </form>

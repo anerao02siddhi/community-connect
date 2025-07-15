@@ -204,6 +204,17 @@ export default function Navbar() {
                   >
                     All Issues
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      handleRequest();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                  >
+                    All Requests
+                  </Button>
                 </>
               )}
 

@@ -108,7 +108,7 @@ export default function AdminDashboard() {
             <h2 className="text-sm font-medium">Total Users</h2>
             <p className="text-2xl font-bold">{overview.usersCount}</p>
           </button>
-          
+
           <div className="rounded-lg bg-[#a80ba3] text-white p-4 flex flex-col items-center justify-center">
             <h2 className="text-sm font-medium">Total Issues</h2>
             <p className="text-2xl font-bold">{overview.issuesCount}</p>
@@ -212,6 +212,7 @@ export default function AdminDashboard() {
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Contact No</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead>Created</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -225,6 +226,45 @@ export default function AdminDashboard() {
                         <TableCell>{user.name}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.phone}</TableCell>
+                        <TableCell>
+                          {user.role === "official" ? (
+                            <div className="flex flex-wrap gap-1">
+                              {/* Approval Status */}
+                              {user.isApproved ? (
+                                <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                  Approved
+                                </span>
+                              ) : (
+                                <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                  Not Approved
+                                </span>
+                              )}
+
+                              {/* Suspension Status */}
+                              {user.isSuspended ? (
+                                <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                                  Suspended
+                                </span>
+                              ) : (
+                                <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                  Active
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            // For normal user
+                            user.isSuspended ? (
+                              <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                                Suspended
+                              </span>
+                            ) : (
+                              <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                Active
+                              </span>
+                            )
+                          )}
+                        </TableCell>
+
                         <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                       </TableRow>
                     ))}

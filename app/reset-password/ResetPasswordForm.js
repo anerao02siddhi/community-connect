@@ -1,17 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // ✅ NEW
   const [loading, setLoading] = useState(false);
+
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const router = useRouter();
@@ -21,6 +25,11 @@ export default function ResetPasswordForm() {
 
     if (!password || !token) {
       toast.error("Missing password or token.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
       return;
     }
 
@@ -37,7 +46,8 @@ export default function ResetPasswordForm() {
       if (res.ok) {
         toast.success(data.message || "Password reset successfully.");
         setPassword("");
-        router.push('login-register');
+        setConfirmPassword("");
+        router.push("login-register");
       } else {
         toast.error(data.error || "Failed to reset password.");
       }
@@ -51,8 +61,8 @@ export default function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-red-600 font-medium">Invalid token.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <p className="text-red-600 font-medium text-center">Invalid token.</p>
       </div>
     );
   }
@@ -67,19 +77,67 @@ export default function ResetPasswordForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
+            {/* Password */}
+            <div className="space-y-2 relative">
               <Label htmlFor="password" className="text-[#a80ba3]">
                 New Password
               </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter new password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter new password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-2 flex items-center"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-500" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-500" />
+                  )}
+                </button>
+              </div>
             </div>
+
+            {/* Confirm Password */}
+            <div className="space-y-2 relative">
+              <Label htmlFor="confirm-password" className="text-[#a80ba3]">
+                Confirm New Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-2 flex items-center"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-500" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-500" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit */}
             <Button
               type="submit"
               className="w-full bg-[#a80ba3] hover:bg-[#8c0b86] text-white"

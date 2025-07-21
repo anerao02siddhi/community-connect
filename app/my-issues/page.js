@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import CommentsSection from "@/components/CommentsSection";
 import { FaMapMarkerAlt, FaThumbsUp, FaRegThumbsUp } from "react-icons/fa";
 import toast from "react-hot-toast";
+import { FaTrash } from "react-icons/fa";
 import { parseCoordinates } from "@/lib/utils";
 import {
   Dialog,
@@ -96,6 +97,33 @@ export default function MyIssuesPage() {
       fetchIssues();
     }
   }, [user, fetchIssues]);
+  const handleDelete = async (issueId) => {
+    const confirmDelete = confirm("Are you sure you want to delete this issue?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`/api/issues/${issueId}/delete-issue`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user": JSON.stringify(user), // sending user for backend auth
+        },
+        body: JSON.stringify({ issueId }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to delete the issue.");
+        return;
+      }
+
+      toast.success("Issue deleted successfully.");
+      fetchIssues(); // refresh list
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("An error occurred while deleting.");
+    }
+  };
 
   const handleToggleUpvote = async (postId) => {
     if (!user) return toast.error("You must be logged in to vote.");
@@ -252,8 +280,8 @@ export default function MyIssuesPage() {
                 </Dialog>
               </div>
 
-              {/* Vote */}
-              <div className="flex items-center gap-2 p-3 border-t">
+              {/* Vote + Delete */}
+              <div className="flex justify-between items-center p-3 border-t">
                 <button
                   onClick={() => handleToggleUpvote(issue.id)}
                   className="flex items-center gap-1"
@@ -266,7 +294,19 @@ export default function MyIssuesPage() {
                   )}
                   <span className="text-sm">{issue.upvotes ?? 0}</span>
                 </button>
+
+                {(user?.role === "admin" || user?.role === "official" || user?.id === issue.userId) && (
+                  <button
+                    onClick={() => handleDelete(issue.id)}
+                    className="text-red-600 hover:text-red-800 text-sm flex items-center gap-1"
+                    title="Delete Issue"
+                  >
+                    <FaTrash />
+                    Delete
+                  </button>
+                )}
               </div>
+
             </div>
           ))}
         </div>

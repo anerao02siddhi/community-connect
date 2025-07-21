@@ -4,14 +4,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@/components/ui/avatar";
+import { Home, LogOut, User } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
 
 export default function Navbar() {
   const { user, logout } = useUser();
   const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -25,6 +37,7 @@ export default function Navbar() {
   };
 
   const handleDashboard = () => {
+    toast("Going Dashboard...");
     router.push("/admin/dashboard");
   };
 
@@ -79,83 +92,85 @@ export default function Navbar() {
             <>
               {user.role === "admin" && (
                 <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleDashboard}
-                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-                  >
+                  <Button className='hover:text-[#a80ba3]' variant="outline" onClick={handleDashboard}>
                     Dashboard
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleIssues}
-                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-                  >
+                  <Button className='hover:text-[#a80ba3]' variant="outline" onClick={handleIssues}>
                     All Issues
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleRequest}
-                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-                  >
+                  <Button className='hover:text-[#a80ba3]' variant="outline" onClick={handleRequest}>
                     Requests
                   </Button>
                 </>
               )}
 
               {user.role === "official" && (
-                <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleOfficialIssues}
-                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-                  >
-                    Official Dashboard
-                  </Button>
-                </>
+                <Button variant="outline" onClick={handleOfficialIssues}>
+                  Official Dashboard
+                </Button>
               )}
 
               {user.role !== "admin" && user.role !== "official" && (
                 <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleHome}
-                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-                  >
+                  <Button className='hover:text-[#a80ba3]' variant="outline" onClick={handleHome}>
                     <Home className="h-4 w-4 mr-1" />
                     Home
                   </Button>
                   <Button
-                    size="sm"
                     variant="outline"
+                    className='hover:text-[#a80ba3]'
                     onClick={() => {
                       toast("Opening My Issues...");
                       router.push("/my-issues");
                     }}
-                    className="rounded-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
                   >
                     My Issues
                   </Button>
                 </>
               )}
 
-              <span className="text-base font-medium text-[#a80ba3]">Hi, {user.name}</span>
-              <Button
-                size="sm"
-                onClick={handleLogout}
-                className="bg-[#a80ba3] text-white rounded-full hover:bg-[#cda0cc]"
-              >
-                Logout
-              </Button>
+              {/* Desktop Profile Dropdown */}
+              <DropdownMenu >
+                <DropdownMenuTrigger className="outline-none">
+                  <Avatar className="h-10 w-10 cursor-pointer">
+                    <AvatarImage
+                      src={user.profileImage || "/images/avatar.jpeg"}
+                      alt={user.name}
+                    />
+                    <AvatarFallback>
+                      {user.name?.split(" ")[0]?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className='bg-white'>
+                  <DropdownMenuLabel className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={user.profileImage || "/images/avatar.jpeg"}
+                      />
+                      <AvatarFallback>
+                        {user.name?.split(" ")[0]?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-semibold">{user.name}</span>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push("/profile")} className='font-semibold'>
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-600 font-semibold"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <Button
-              size="sm"
               className="rounded-full bg-[#a80ba3] text-white hover:bg-[#cda0cc]"
               onClick={handleLogin}
             >
@@ -164,118 +179,114 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Mobile Menu */}
+        {/* Mobile Avatar Dropdown (no hamburger icon) */}
         <div className="md:hidden">
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6 text-[#a80ba3]" />
-            ) : (
-              <Menu className="h-6 w-6 text-[#a80ba3]" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {mobileMenuOpen && (
-        <div className="absolute left-0 right-0 mt-1 md:hidden bg-white border-t px-4 py-3 space-y-3 shadow-lg z-50">
           {user ? (
-            <>
-              {user.role === "admin" && (
-                <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      handleDashboard();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-                  >
-                    Dashboard
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      handleIssues();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-                  >
-                    All Issues
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      handleRequest();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
-                  >
-                    All Requests
-                  </Button>
-                </>
-              )}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="outline-none">
+                <Avatar className="h-10 w-10 cursor-pointer">
+                  <AvatarImage
+                    src={user.profileImage || "/images/avatar.jpeg"}
+                    alt={user.name}
+                  />
+                  <AvatarFallback>
+                    {user.name?.split(" ")[0]?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
 
-              {user.role === "official" && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    handleOfficialIssues();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+              <DropdownMenuContent align="end" className="w-56 bg-white">
+                {/* Profile Info */}
+                <DropdownMenuLabel className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={user.profileImage || "/images/avatar.jpeg"}
+                    />
+                    <AvatarFallback>
+                      {user.name?.split(" ")[0]?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-semibold">{user.name}</span>
+                </DropdownMenuLabel>
+
+                <DropdownMenuSeparator />
+
+                {/* Profile Link */}
+                <DropdownMenuItem
+                  onClick={() => router.push("/profile")}
+                  className="font-semibold hover:text-[#a80ba3]"
                 >
-                  Official Dashboard
-                </Button>
-              )}
+                  <User className="w-4 h-4" />
+                  Profile
+                </DropdownMenuItem>
 
-              {user.role !== "admin" && user.role !== "official" && (
-                <>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      router.push("/my-issues");
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full border border-[#a80ba3] text-[#a80ba3] hover:bg-[#f4d2f3]"
+                {/* Admin Menu */}
+                {user.role === "admin" && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={handleDashboard}
+                      className="font-semibold hover:text-[#a80ba3]"
+                    >
+                      🛠️  Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleIssues}
+                      className="font-semibold hover:text-[#a80ba3]"
+                    >
+                      📝  All Issues
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleRequest}
+                      className="font-semibold hover:text-[#a80ba3]"
+                    >
+                      📥  All Requests
+                    </DropdownMenuItem>
+                  </>
+                )}
+
+                {/* Official Menu */}
+                {user.role === "official" && (
+                  <DropdownMenuItem
+                    onClick={() => router.push("/officials/all-issues")}
+                    className="font-semibold hover:text-[#a80ba3]"
                   >
-                    My Issues
-                  </Button>
-                </>
-              )}
+                    🛠️ Official Dashboard
+                  </DropdownMenuItem>
+                )}
 
-              <span className="block text-gray-800 text-base font-medium">
-                Hi, {user.name}
-              </span>
-              <Button
-                size="sm"
-                onClick={() => {
-                  handleLogout();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full bg-[#a80ba3] text-white rounded-full hover:bg-gray-300"
-              >
-                Logout
-              </Button>
-            </>
+                {/* User Menu */}
+                {user.role !== "admin" && user.role !== "official" && (
+                  <DropdownMenuItem
+                    onClick={() => router.push("/my-issues")}
+                    className="font-semibold hover:text-[#a80ba3]"
+                  >
+                    🗂️ My Issues
+                  </DropdownMenuItem>
+                )}
+
+                <DropdownMenuSeparator />
+
+                {/* Logout */}
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600 font-semibold"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button
-              size="sm"
-              className="w-full rounded-full bg-[#a80ba3] text-white hover:bg-[#cda0cc]"
-              onClick={() => {
-                handleLogin();
-                setMobileMenuOpen(false);
-              }}
+              onClick={handleLogin}
+              className="rounded-full bg-[#a80ba3] text-white hover:bg-[#cda0cc]"
             >
               Login
             </Button>
           )}
         </div>
-      )}
+
+      </div>
     </header>
   );
 }

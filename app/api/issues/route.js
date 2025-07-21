@@ -4,7 +4,7 @@ export async function POST(req) {
   try {
     const { title, description, location, email, imageUrl, state, district, taluka, address, pincode, category, issueType } = await req.json();
 
-    if (!title || !description || !location || !email || !address || !pincode || !category || !issueType || !state || !district || !taluka) {
+    if (!title || !description || !email || !address || !pincode || !category || !issueType || !state || !district || !taluka) {
       return Response.json({ error: "All fields are required." }, { status: 400 });
     }
 
@@ -38,9 +38,11 @@ export async function POST(req) {
 }
 
 
-
 export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+
     const issues = await prisma.post.findMany({
       orderBy: { createdAt: "desc" },
       select: {
@@ -49,7 +51,7 @@ export async function GET(req) {
         description: true,
         createdAt: true,
         upvotes: true,
-        upvotedBy: true,
+        upvotedBy: true, // Array of userIds
         address: true,
         taluka: true,
         district: true,
@@ -64,12 +66,22 @@ export async function GET(req) {
       },
     });
 
-    const issuesWithUpvoteFlag = issues.map((issue) => ({
-      ...issue,
-      hasUpvoted: false, // No user context on home page
-    }));
+    const issuesWithUpvoteFlag = issues.map((issue) => {
+      const hasUpvoted =
+        userId && Array.isArray(issue.upvotedBy)
+          ? issue.upvotedBy.includes(userId)
+          : false;
 
-    return Response.json(issuesWithUpvoteFlag);
+      return {
+        ...issue,
+        hasUpvoted: Boolean(hasUpvoted),
+      };
+    });
+
+    return new Response(JSON.stringify(issuesWithUpvoteFlag), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("Error fetching all issues:", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
@@ -77,4 +89,5 @@ export async function GET(req) {
     });
   }
 }
+
 

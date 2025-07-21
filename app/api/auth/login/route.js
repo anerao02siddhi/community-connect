@@ -45,11 +45,6 @@ export async function POST(req) {
   // 5️⃣  Return token + safe user info
   return Response.json({
     token,
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    },
+    user,
   });
 }

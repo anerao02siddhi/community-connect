@@ -9,6 +9,7 @@ import { FaMapMarkerAlt, FaRegImages, FaThumbsUp, FaRegThumbsUp } from "react-ic
 import { useKeenSlider } from "keen-slider/react";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import { issueOptions } from "@/lib/issueData";
 
 function parseCoordinates(locationString) {
   const [lat, lng] = locationString?.split(",").map((val) => parseFloat(val.trim()));
@@ -25,6 +26,9 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [user, setUser] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("recent"); // default: recent
   const [sliderRef] = useKeenSlider({
     loop: true,
     slides: { perView: 1 },
@@ -107,15 +111,27 @@ export default function HomePage() {
     }
   };
 
-  const filteredIssues = issues.filter(
-    (issue) =>
+  const filteredIssues = issues
+    .filter((issue) =>
       issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       issue.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    )
+    .filter((issue) =>
+      statusFilter === "all" || issue.status?.toLowerCase() === statusFilter.toLowerCase()
+    )
+    .filter((issue) =>
+      typeFilter === "all" || issue.category?.toLowerCase() === typeFilter.toLowerCase()
+    );
 
-  const totalPages = Math.ceil(filteredIssues.length / recordsPerPage);
+  const sortedIssues = [...filteredIssues].sort((a, b) => {
+    if (sortBy === "priority") return (b.upvotes ?? 0) - (a.upvotes ?? 0);
+    if (sortBy === "recent") return new Date(b.createdAt) - new Date(a.createdAt);
+    return 0;
+  });
 
-  const paginatedIssues = filteredIssues.slice(
+  const totalPages = Math.ceil(sortedIssues.length / recordsPerPage);
+
+  const paginatedIssues = sortedIssues.slice(
     (currentPage - 1) * recordsPerPage,
     currentPage * recordsPerPage
   );
@@ -125,14 +141,50 @@ export default function HomePage() {
       <h1 className="text-2xl font-bold mb-2 text-[#a80ba3]">Community Issues</h1>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-2 py-2 mb-2">
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-white border border-[#a80ba3] rounded px-3 py-2 w-full sm:w-72 focus:outline-none focus:ring focus:border-[#a80ba3]"
-        />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-2 py-2 mb-4 flex-wrap">
+        {/* Filters + Search */}
+        <div className="flex flex-wrap items-center gap-2 flex-grow">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="border border-[#a80ba3] rounded px-2 py-1 text-sm"
+          >
+            <option value="all">Status: All</option>
+            <option value="Open">Open</option>
+            <option value="Working">Working</option>
+            <option value="Resolve">Resolved</option>
+          </select>
+
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="border border-[#a80ba3] rounded px-2 py-1 text-sm"
+          >
+            <option value="all">Type: All</option>
+            {Object.keys(issueOptions).map((category) => (
+              <option key={category} value={category.toLowerCase()}>{category}</option>
+            ))}
+          </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="border border-[#a80ba3] rounded px-2 py-1 text-sm"
+          >
+            <option value="priority">Sort: Priority</option>
+            <option value="recent">Sort: Latest</option>
+          </select>
+
+          <input
+            type="text"
+            placeholder="Search by title or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="bg-white border border-[#a80ba3] rounded px-3 py-1 text-sm w-full sm:w-64"
+          />
+        </div>
+
+        {/* New Issue Button */}
         <Button
           onClick={() => router.push("/new-issue")}
           className="bg-[#a80ba3] hover:bg-[#922a8f] text-white w-full sm:w-auto"
@@ -140,6 +192,7 @@ export default function HomePage() {
           + New Issue
         </Button>
       </div>
+
 
       <div className="border border-transparent rounded-lg shadow-lg max-w-6xl mx-auto">
         {/* Responsive Table */}

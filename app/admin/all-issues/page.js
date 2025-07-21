@@ -27,13 +27,8 @@ import {
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
-import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
-} from "@/components/ui/select";
+import { issueOptions } from "@/lib/issueData";
+
 
 function parseCoordinates(locationString) {
     const [lat, lng] = locationString?.split(",").map((v) => parseFloat(v.trim()));
@@ -47,9 +42,12 @@ export default function AllIssues() {
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
-    const [statusFilterIssue, setStatusFilterIssue] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("all");
+    const [typeFilter, setTypeFilter] = useState("all");
     const [expandedDescriptions, setExpandedDescriptions] = useState({});
     const [sliderRef] = useKeenSlider({ loop: true, slides: { perView: 1 } });
+    const [user, setUser] = useState();
+    const [sortBy, setSortBy] = useState("recent"); // default: recent
 
     const recordsPerPage = 20;
 
@@ -65,6 +63,7 @@ export default function AllIssues() {
             router.push("/");
             return;
         }
+        setUser(user); // ✅ THIS LINE IS MISSING
         setAuthorized(true);
         fetchIssues();
     }, [router]);
@@ -76,6 +75,34 @@ export default function AllIssues() {
         setIssues(data);
         setLoading(false);
     };
+
+    const handleDeleteIssue = async (issueId) => {
+        if (!window.confirm("Are you sure you want to delete this issue?")) return;
+
+        try {
+            const res = await fetch(`/api/issues/${issueId}/delete-issue`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-user": JSON.stringify(user), // 👈 send user info here
+                },
+                body: JSON.stringify({ issueId }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                toast.success("Issue deleted successfully!");
+                setIssues(prev => prev.filter(issue => issue.id !== issueId));
+            } else {
+                toast.error(data.error || "Failed to delete issue");
+            }
+        } catch (err) {
+            console.error("Client delete error:", err);
+            toast.error("Something went wrong while deleting the issue");
+        }
+    };
+
 
     const updateStatus = async (id, status) => {
         const res = await fetch(`/api/issues/${id}/status`, {
@@ -92,21 +119,26 @@ export default function AllIssues() {
     };
 
     if (!authorized) return null;
-
-    const filteredIssues = issues.filter((issue) => {
-        const textMatch =
+    const filteredIssues = issues
+        .filter((issue) =>
             issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            issue.description.toLowerCase().includes(searchTerm.toLowerCase());
+            issue.description.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .filter((issue) =>
+            statusFilter === "all" || issue.status?.toLowerCase() === statusFilter.toLowerCase()
+        )
+        .filter((issue) =>
+            typeFilter === "all" || issue.category?.toLowerCase() === typeFilter.toLowerCase()
+        );
 
-        const statusMatch =
-            statusFilterIssue === "all" || issue.status === statusFilterIssue;
-
-        return textMatch && statusMatch;
+    const sortedIssues = [...filteredIssues].sort((a, b) => {
+        if (sortBy === "priority") return (b.upvotes ?? 0) - (a.upvotes ?? 0);
+        if (sortBy === "recent") return new Date(b.createdAt) - new Date(a.createdAt);
+        return 0;
     });
+    const totalPages = Math.ceil(sortedIssues.length / recordsPerPage);
 
-    const totalPages = Math.ceil(filteredIssues.length / recordsPerPage);
-
-    const paginatedIssues = filteredIssues.slice(
+    const paginatedIssues = sortedIssues.slice(
         (currentPage - 1) * recordsPerPage,
         currentPage * recordsPerPage
     );
@@ -114,7 +146,39 @@ export default function AllIssues() {
     return (
         <div className="p-4 sm:px-8">
             <h1 className="text-2xl font-bold mb-2 text-[#a80ba3]">All Issues</h1>
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+                <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="w-[48%] sm:w-auto border border-[#a80ba3] rounded px-2 py-1 text-sm"
+                >
+                    <option value="all">Status: All</option>
+                    <option value="Open">Open</option>
+                    <option value="Working">Working</option>
+                    <option value="Resolve">Resolved</option>
+                </select>
 
+                <select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                    className="w-[48%] sm:w-auto border border-[#a80ba3] rounded px-2 py-1 text-sm"
+                >
+                    <option value="all">Type: All</option>
+                    {Object.keys(issueOptions).map((category) => (
+                        <option key={category} value={category.toLowerCase()}>{category}</option>
+                    ))}
+                </select>
+
+                <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full sm:w-auto border border-[#a80ba3] rounded px-2 py-1 text-sm"
+                >
+                    <option value="priority">Sort: Priority</option>
+                    <option value="recent">Sort: Latest</option>
+                </select>
+            </div>
             {/* Search & Filter */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-2 py-2 mb-2">
                 <input
@@ -125,7 +189,7 @@ export default function AllIssues() {
                     className="bg-white border border-[#a80ba3] rounded px-3 py-2 w-full sm:w-72 focus:outline-none focus:ring focus:border-[#a80ba3]"
                 />
 
-                <Select value={statusFilterIssue} onValueChange={setStatusFilterIssue}>
+                {/* <Select value={statusFilterIssue} onValueChange={setStatusFilterIssue}>
                     <SelectTrigger className="w-[150px] border border-[#a80ba3]">
                         <SelectValue placeholder="Status" />
                     </SelectTrigger>
@@ -135,7 +199,7 @@ export default function AllIssues() {
                         <SelectItem value="Working">Working</SelectItem>
                         <SelectItem value="Resolve">Resolved</SelectItem>
                     </SelectContent>
-                </Select>
+                </Select> */}
             </div>
 
             {/* Table */}
@@ -315,6 +379,17 @@ export default function AllIssues() {
                                                             Mark {status}
                                                         </DropdownMenuItem>
                                                     ))}
+
+                                                    {(user?.role === "admin" ||
+                                                        user?.role === "official" ||
+                                                        user?.id === issue.userId) && (
+                                                            <DropdownMenuItem
+                                                                onClick={() => handleDeleteIssue(issue.id)}
+                                                                className="text-red-600 hover:bg-red-50 focus:bg-red-100"
+                                                            >
+                                                                Delete
+                                                            </DropdownMenuItem>
+                                                        )}
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         </TableCell>

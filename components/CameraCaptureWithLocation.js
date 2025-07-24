@@ -1,6 +1,4 @@
-// File: components/CameraCaptureWithLocation.js
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
